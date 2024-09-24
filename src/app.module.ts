@@ -1,4 +1,5 @@
-import { Module, HttpModule, HttpService } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 
