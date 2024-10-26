@@ -3,14 +3,28 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Order } from '../entities/order.entity';
+import { Product } from '../../products/entities/product.entity';
+
 import { CreateOrderDto, UpdateOrderDto } from '../dtos/order.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(@InjectModel(Order.name) private orderModel: Model<Order>) {}
+  constructor(
+    @InjectModel(Order.name) private orderModel: Model<Order>,
+    @InjectModel(Product.name) private productModel: Model<Product>,
+  ) {}
 
-  findAll() {
-    return this.orderModel.find().exec();
+  async findAll() {
+    const orders = await this.orderModel.find().populate('customer');
+    for (const order of orders) {
+      await Promise.all(
+        order.products.map(async (productId, index) => {
+          const product = await this.productModel.findById(productId);
+          order.products[index] = product;
+        }),
+      );
+    }
+    return orders;
   }
 
   async findOne(id: string) {
